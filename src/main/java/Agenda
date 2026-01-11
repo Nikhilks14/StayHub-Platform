@@ -1,0 +1,13 @@
+
+
+
+
+Week 3 Agenda
+
+Setup the HotelManger APIs to mange
+    - Hotel
+    - Room
+    - Inventory
+  Response Handler to
+    - manage the error
+    - to transform API response

@@ -30,4 +30,6 @@ public class Guest {
 
     @ManyToMany(mappedBy = "guests")
     private Set<Booking> bookings;
+
+
 }
