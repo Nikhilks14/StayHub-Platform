@@ -19,10 +19,12 @@ public class Hotel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
     private String city;
 
+    @Column(columnDefinition = "TEXT[]")
     private String[] photo;
 
     @Column(columnDefinition = "TEXT[]")
@@ -39,6 +41,9 @@ public class Hotel {
 
     @Column(nullable = false)
     private Boolean active;
+
+    @ManyToOne
+    private User owner;
 
     @OneToMany(mappedBy = "hotel", fetch = FetchType.LAZY)
     private List<Room> rooms;
