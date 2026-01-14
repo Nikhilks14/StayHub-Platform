@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PatchMapping;
 
 @Service
 @Slf4j
@@ -56,6 +57,19 @@ public class HotelServiceImpl implements HotelService{
 
         // TODO : delete the future inventories for this hotel
     }
+
+    @Override
+    public void activateHotel(Long hotelId) {
+        log.info("Updating the hotel with ID: {}" , hotelId);
+        Hotel hotel = hotelRepository
+                .findById(hotelId)
+                .orElseThrow( ()-> new ResoureceNotFoundException("Hotel is not found with id :" + hotelId));
+       hotel.setActive(true);
+
+       // Todo : Create inventory foal all thr room for this hotel
+    }
+
+
 
 
 }
