@@ -35,9 +35,9 @@ public class Room {
     private String[] amenities;
 
     @Column(nullable = false)
-    private String totalCount;
+    private Integer totalCount;
 
-    private String capacity;
+    private Integer capacity;
 
     @CreationTimestamp
     @Column(updatable = false)

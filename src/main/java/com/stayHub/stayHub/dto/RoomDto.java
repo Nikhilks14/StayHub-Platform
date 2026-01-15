@@ -15,6 +15,6 @@ public class RoomDto {
     private BigDecimal basePrice;
     private String[] photo;
     private String[] amenities;
-    private String totalCount;
-    private String capacity;
+    private Integer totalCount;
+    private Integer capacity;
 }

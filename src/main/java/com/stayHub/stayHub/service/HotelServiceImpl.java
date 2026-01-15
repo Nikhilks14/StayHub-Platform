@@ -2,12 +2,14 @@ package com.stayHub.stayHub.service;
 
 import com.stayHub.stayHub.dto.HotelDto;
 import com.stayHub.stayHub.entity.Hotel;
+import com.stayHub.stayHub.entity.Room;
 import com.stayHub.stayHub.exception.ResoureceNotFoundException;
 import com.stayHub.stayHub.repositry.HotelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PatchMapping;
 
 @Service
@@ -17,6 +19,7 @@ public class HotelServiceImpl implements HotelService{
 
     private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
+    private final InventoryService inventoryService;
 
     @Override
     public HotelDto createNewHotel(HotelDto hotelDto) {
@@ -50,15 +53,22 @@ public class HotelServiceImpl implements HotelService{
     }
 
     @Override
+    @Transactional
     public void deleteHotelById(Long id) {
-        boolean exists = hotelRepository.existsById(id);
-        if (!exists) throw new ResoureceNotFoundException("Hotel not found with id : " + id);
+
+        Hotel hotel = hotelRepository
+                .findById(id)
+                        .orElseThrow( ()-> new ResoureceNotFoundException("Hotel not found with ID: " + id));
         hotelRepository.deleteById(id);
 
         // TODO : delete the future inventories for this hotel
+        for(Room room : hotel.getRooms()){
+            inventoryService.deleteFutureInventories(room);
+        }
     }
 
     @Override
+    @Transactional
     public void activateHotel(Long hotelId) {
         log.info("Updating the hotel with ID: {}" , hotelId);
         Hotel hotel = hotelRepository
@@ -66,7 +76,13 @@ public class HotelServiceImpl implements HotelService{
                 .orElseThrow( ()-> new ResoureceNotFoundException("Hotel is not found with id :" + hotelId));
        hotel.setActive(true);
 
-       // Todo : Create inventory foal all thr room for this hotel
+       // Todo : Create inventory foal all thr room for this hotel - done
+        // assuming only do it once
+
+        for(Room room : hotel.getRooms()){
+            inventoryService.initializeRoomForAYear(room);
+        }
+
     }
 
 
