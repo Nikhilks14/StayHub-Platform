@@ -1,5 +1,6 @@
 package com.stayHub.stayHub.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ public class Room {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
+    @JsonBackReference
     private Hotel hotel;
 
     @Column(nullable = false)

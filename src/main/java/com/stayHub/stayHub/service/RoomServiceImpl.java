@@ -70,7 +70,7 @@ public class RoomServiceImpl implements RoomService{
                 .orElseThrow( ()-> new ResoureceNotFoundException("Room not found with ID:" + roomId));
 
         // TODO : delete all future inventory for this room
-        inventoryService.deleteFutureInventories(room);
+        inventoryService.deleteAllInventories(room);
         roomRepository.deleteById(roomId);
     }
 }

@@ -1,5 +1,6 @@
 package com.stayHub.stayHub.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -45,6 +46,7 @@ public class Hotel {
     @ManyToOne
     private User owner;
 
-    @OneToMany(mappedBy = "hotel", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "hotel")
+    @JsonManagedReference
     private List<Room> rooms;
 }

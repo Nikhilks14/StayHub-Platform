@@ -5,12 +5,12 @@ import com.stayHub.stayHub.entity.Hotel;
 import com.stayHub.stayHub.entity.Room;
 import com.stayHub.stayHub.exception.ResoureceNotFoundException;
 import com.stayHub.stayHub.repositry.HotelRepository;
+import com.stayHub.stayHub.repositry.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PatchMapping;
 
 @Service
 @Slf4j
@@ -20,6 +20,7 @@ public class HotelServiceImpl implements HotelService{
     private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
     private final InventoryService inventoryService;
+    private final RoomRepository roomRepository;
 
     @Override
     public HotelDto createNewHotel(HotelDto hotelDto) {
@@ -59,18 +60,18 @@ public class HotelServiceImpl implements HotelService{
         Hotel hotel = hotelRepository
                 .findById(id)
                         .orElseThrow( ()-> new ResoureceNotFoundException("Hotel not found with ID: " + id));
-        hotelRepository.deleteById(id);
 
-        // TODO : delete the future inventories for this hotel
         for(Room room : hotel.getRooms()){
-            inventoryService.deleteFutureInventories(room);
+            inventoryService.deleteAllInventories(room);
+            roomRepository.deleteById(room.getId());
         }
+        hotelRepository.deleteById(id);
     }
 
     @Override
     @Transactional
     public void activateHotel(Long hotelId) {
-        log.info("Updating the hotel with ID: {}" , hotelId);
+        log.info("Active the hotel with ID: {}" , hotelId);
         Hotel hotel = hotelRepository
                 .findById(hotelId)
                 .orElseThrow( ()-> new ResoureceNotFoundException("Hotel is not found with id :" + hotelId));
