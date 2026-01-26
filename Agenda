@@ -1,0 +1,24 @@
+
+
+
+
+Phase 3 Agenda
+
+    Setup the HotelManger APIs to mange
+        - Hotel
+        - Room
+        - Inventory
+    Response Handler to
+        - manage the error
+        - to transform API response
+
+Phase 4 Agenda
+
+    Browser
+        - paginated API to search
+        - Get Hotel details : get all rooms
+
+    Booking
+        - initiate Booking API
+        - Add Guests
+        - Initiate Payments

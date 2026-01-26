@@ -1,14 +1,22 @@
 package com.stayHub.stayHub.service;
 
+import com.stayHub.stayHub.dto.HotelDto;
+import com.stayHub.stayHub.dto.HotelSearchRequest;
+import com.stayHub.stayHub.entity.Hotel;
 import com.stayHub.stayHub.entity.Inventory;
 import com.stayHub.stayHub.entity.Room;
 import com.stayHub.stayHub.repositry.InventoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +24,7 @@ import java.time.LocalDate;
 public class InventoryServiceImpl implements InventoryService{
 
     private final InventoryRepository inventoryRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public void initializeRoomForAYear(Room room) {
@@ -27,6 +36,7 @@ public class InventoryServiceImpl implements InventoryService{
                     .hotel(room.getHotel())
                     .room(room)
                     .bookedCount(0)
+                    .reservedCount(0)
                     .city(room.getHotel().getCity())
                     .date(today)
                     .price(room.getBasePrice())
@@ -43,5 +53,24 @@ public class InventoryServiceImpl implements InventoryService{
     public void deleteAllInventories(Room room) {
         log.info("Deleting the inventories of room with id: {}", room.getId());
         inventoryRepository.deleteByRoom(room);
+    }
+
+    @Override
+    public Page<HotelDto> searchHotels(HotelSearchRequest hotelSearchRequest) {
+
+        log.info("Searching hotel for {} city, from {} to {}", hotelSearchRequest.getCity(),hotelSearchRequest.getStartDate(), hotelSearchRequest.getEndDate());
+        Pageable pageable = PageRequest.of(hotelSearchRequest.getPage(), hotelSearchRequest.getSize());
+
+        long dateCount = ChronoUnit.DAYS
+                .between(hotelSearchRequest.getStartDate(), hotelSearchRequest.getEndDate()) + 1;
+
+        Page<Hotel> hotelPage = inventoryRepository.findHotelWithAvailableInventory(
+                hotelSearchRequest.getCity(),
+                hotelSearchRequest.getStartDate(),
+                hotelSearchRequest.getEndDate(),
+                hotelSearchRequest.getRoomsCount(),
+                dateCount, pageable);
+
+        return hotelPage.map((element) -> modelMapper.map(element, HotelDto.class));
     }
 }

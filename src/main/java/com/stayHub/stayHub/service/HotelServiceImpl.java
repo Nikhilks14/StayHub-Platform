@@ -1,6 +1,8 @@
 package com.stayHub.stayHub.service;
 
 import com.stayHub.stayHub.dto.HotelDto;
+import com.stayHub.stayHub.dto.HotelInfoDto;
+import com.stayHub.stayHub.dto.RoomDto;
 import com.stayHub.stayHub.entity.Hotel;
 import com.stayHub.stayHub.entity.Room;
 import com.stayHub.stayHub.exception.ResoureceNotFoundException;
@@ -11,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -77,7 +81,6 @@ public class HotelServiceImpl implements HotelService{
                 .orElseThrow( ()-> new ResoureceNotFoundException("Hotel is not found with id :" + hotelId));
        hotel.setActive(true);
 
-       // Todo : Create inventory foal all thr room for this hotel - done
         // assuming only do it once
 
         for(Room room : hotel.getRooms()){
@@ -86,7 +89,20 @@ public class HotelServiceImpl implements HotelService{
 
     }
 
+    @Override
+    public HotelInfoDto getHotelInfoById(Long hotelId) {
 
+        Hotel hotel = hotelRepository
+                .findById(hotelId)
+                .orElseThrow( ()-> new ResoureceNotFoundException("Hotel is not found with id :" + hotelId));
+
+        List<RoomDto> rooms = hotel.getRooms()
+                .stream()
+                .map((element) -> modelMapper.map(element, RoomDto.class))
+                .toList();
+
+        return new HotelInfoDto(modelMapper.map(hotel, HotelDto.class), rooms);
+    }
 
 
 }
