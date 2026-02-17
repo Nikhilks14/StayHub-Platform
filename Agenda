@@ -22,3 +22,15 @@ Phase 4 Agenda
         - initiate Booking API
         - Add Guests
         - Initiate Payments
+
+
+Phase 5 Agenda
+    Dynamic pricing
+    - DecoratorDesign Pattern
+    - Schedular to update pricing every hour
+
+    Booking
+    - Initiate Booking API
+    - Add Guests
+    - Initiate Payment
+    - Capture Paykment
