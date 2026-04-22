@@ -5,6 +5,7 @@ import com.stayHub.stayHub.dto.SignUpRequestDto;
 import com.stayHub.stayHub.dto.UserDto;
 import com.stayHub.stayHub.entity.User;
 import com.stayHub.stayHub.entity.enums.Role;
+import com.stayHub.stayHub.exception.ResoureceNotFoundException;
 import com.stayHub.stayHub.repositry.UserRepository;
 import com.stayHub.stayHub.security.JWTService;
 import lombok.RequiredArgsConstructor;
@@ -43,20 +44,28 @@ public class AuthService {
         return modelMapper.map(newUser,UserDto.class);
     }
 
-public String[] login(LoginDto  loginDto){
-    Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-            loginDto.getEmail(), loginDto.getPassword()
-    ));
+        public String[] login(LoginDto  loginDto){
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    loginDto.getEmail(), loginDto.getPassword()
+            ));
 
-    User user = (User) authentication.getPrincipal();
+            User user = (User) authentication.getPrincipal();
 
-    String[] arr = new String[2];
+            String[] arr = new String[2];
 
-    arr[0] = jwtService.generateAccessToken(user);
-    arr[1] = jwtService.generateRefreshToken(user);
+            arr[0] = jwtService.generateAccessToken(user);
+            arr[1] = jwtService.generateRefreshToken(user);
 
-    return arr;
+            return arr;
 
-}
+        }
+
+
+        public String refreshToken(String refreshToken){
+            Long id = jwtService.getUserIdFromToken(refreshToken);
+
+            User user = userRepository.findById(id).orElseThrow(()-> new ResoureceNotFoundException("User not found with id : " + id));
+            return  jwtService.generateAccessToken(user);
+        }
 
 }

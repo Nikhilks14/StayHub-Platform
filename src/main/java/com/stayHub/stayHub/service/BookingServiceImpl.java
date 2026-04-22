@@ -6,6 +6,7 @@ import com.stayHub.stayHub.dto.GuestDto;
 import com.stayHub.stayHub.entity.*;
 import com.stayHub.stayHub.entity.enums.BookingStaus;
 import com.stayHub.stayHub.exception.ResoureceNotFoundException;
+import com.stayHub.stayHub.exception.UnAuthorisedExceptions;
 import com.stayHub.stayHub.repositry.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ public class BookingServiceImpl implements BookingService {
 
         Hotel hotel = hotelRepository.findById(bookingRequest.getHotelId())
                 .orElseThrow(() -> new ResoureceNotFoundException("Hotel Not Found with id:"  + bookingRequest.getHotelId()));
+
 
         Room room = roomRepository.findById(bookingRequest.getRoomId())
                 .orElseThrow(() -> new ResoureceNotFoundException("Room Not Found with id:"  + bookingRequest.getRoomId()));
@@ -99,7 +101,12 @@ public class BookingServiceImpl implements BookingService {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(()-> new ResoureceNotFoundException("Booking Not Found with id:" + bookingId));
+        User user = getCurrentUser();
 
+        if (!user.equals(booking.getUser())) {
+            throw new UnAuthorisedExceptions("Booking not found with id : " + user.getId());
+
+        }
 
         if(hasBookingExpired(booking)) {
             throw new IllegalStateException("Booking has already expired");
@@ -111,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
 
         for(GuestDto guestDto : guestDtoList) {
             Guest guest = modelMapper.map(guestDto, Guest.class);
-            guest.setUser(getCurrentUser());
+            guest.setUser(user);
             guest = guestRepository.save(guest);
             booking.getGuests().add(guest);
         }
