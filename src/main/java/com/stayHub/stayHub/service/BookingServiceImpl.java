@@ -11,6 +11,7 @@ import com.stayHub.stayHub.repositry.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,12 @@ public class BookingServiceImpl implements BookingService {
     private final InventoryRepository inventoryRepository;
     private final ModelMapper modelMapper;
     private final GuestRepository guestRepository;
+    private final CheckOutService checkOutService;
+
+
+    @Value("${forntend_url}")
+    private String forntend_url;
+
 
     @Override
     @Transactional
@@ -127,6 +134,33 @@ public class BookingServiceImpl implements BookingService {
         booking = bookingRepository.save(booking);
         return modelMapper.map(booking, BookingDto.class);
 
+    }
+
+    @Override
+    public String initiatePayment(Long bookingId) {
+
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(
+                () -> new ResoureceNotFoundException("Booking Not Found with id:" + bookingId)
+        );
+
+        User user = getCurrentUser();
+
+        if (!user.equals(booking.getUser())) {
+            throw new UnAuthorisedExceptions("Booking not found with id : " + user.getId());
+        }
+
+        if(hasBookingExpired(booking)) {
+            throw new IllegalStateException("Booking has already expired");
+        }
+
+       String session =  checkOutService.getCheckOutSession(booking ,
+                forntend_url +"payments/success",
+                forntend_url +"payments/failure");
+
+        booking.setBookingStaus(BookingStaus.PAYMENT_PENDING);
+        bookingRepository.save(booking);
+
+        return session;
     }
 
     public boolean hasBookingExpired(Booking booking){

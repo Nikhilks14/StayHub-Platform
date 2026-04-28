@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,6 +27,13 @@ public class HotelBookingController {
     public ResponseEntity<BookingDto> addGuests(@PathVariable("bookingId") Long bookingId,
                                                 @RequestBody List<GuestDto>  guestDtoList) {
         return ResponseEntity.ok(bookingService.addGuests(bookingId, guestDtoList));
+
+    }
+
+    @PostMapping("/{bookingId}/payment")
+    public ResponseEntity<Map<String , String>> initiatePayment(@PathVariable("bookingId") Long bookingId) {
+        String sessionurl = bookingService.initiatePayment(bookingId);
+        return ResponseEntity.ok(Map.of("sessionurl", sessionurl));
 
     }
 
